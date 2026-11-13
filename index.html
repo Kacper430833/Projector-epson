@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Projektor Epson - Symulacja</title>
+
+<style>
+body{
+    margin:0;
+    background:#d9d9d9;
+    font-family:Arial,sans-serif;
+    overflow:hidden;
+}
+
+#room{
+    width:100vw;
+    height:100vh;
+    position:relative;
+    background:#e5e5e5;
+}
+
+#screen{
+    width:700px;
+    height:400px;
+    background:#111;
+    border:8px solid #333;
+    position:absolute;
+    left:50%;
+    top:60px;
+    transform:translateX(-50%);
+    transition:0.5s;
+    overflow:hidden;
+}
+
+#screen.on{
+    background:white;
+}
+
+#projection{
+    color:black;
+    font-size:40px;
+    font-weight:bold;
+    text-align:center;
+    margin-top:160px;
+    display:none;
+}
+
+#projector{
+    width:150px;
+    height:70px;
+    background:white;
+    border:3px solid #888;
+    border-radius:10px;
+    position:absolute;
+    top:5px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+#lens{
+    width:35px;
+    height:35px;
+    background:#222;
+    border-radius:50%;
+    position:absolute;
+    right:10px;
+    top:15px;
+}
+
+#light{
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:180px solid transparent;
+    border-right:180px solid transparent;
+    border-bottom:420px solid rgba(255,255,180,0.35);
+    display:none;
+}
+
+#remote{
+    position:absolute;
+    bottom:40px;
+    right:50px;
+    width:120px;
+    background:#222;
+    padding:10px;
+    border-radius:15px;
+}
+
+.remotebtn{
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.power{
+    background:red;
+    color:white;
+}
+
+.status{
+    position:absolute;
+    top:90px;
+    left:20px;
+    background:white;
+    padding:10px;
+    border-radius:10px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="room">
+
+<div id="projector">
+<div id="lens"></div>
+</div>
+
+<div id="light"></div>
+
+<div id="screen">
+<div id="projection">
+EPSON<br>
+PROJEKTOR GOTOWY
+</div>
+</div>
+
+<div class="status" id="status">
+Projektor wyłączony
+</div>
+
+<div id="remote">
+<button class="remotebtn power" onclick="toggleProjector()">
+POWER
+</button>
+</div>
+
+</div>
+
+<script>
+
+let projectorOn=false;
+let audioCtx;
+let noise;
+
+function createFanSound() {
+
+    if (!audioCtx)
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const bufferSize = 4096;
+    const whiteNoise = audioCtx.createScriptProcessor(bufferSize,1,1);
+
+    whiteNoise.onaudioprocess = function(e){
+        let output = e.outputBuffer.getChannelData(0);
+        for(let i=0;i<bufferSize;i++){
+            output[i]=(Math.random()*2-1)*0.03;
+        }
+    };
+
+    whiteNoise.connect(audioCtx.destination);
+    noise=whiteNoise;
+}
+
+function stopFanSound(){
+    if(noise){
+        noise.disconnect();
+        noise=null;
+    }
+}
+
+function toggleProjector(){
+
+    if(!projectorOn){
+
+        projectorOn=true;
+
+        document.getElementById("status").innerHTML =
+        "Uruchamianie projektora...";
+
+        setTimeout(()=>{
+
+            document.getElementById("screen").classList.add("on");
+            document.getElementById("projection").style.display="block";
+            document.getElementById("light").style.display="block";
+
+            document.getElementById("status").innerHTML =
+            "Projektor Epson działa";
+
+            createFanSound();
+
+        },2500);
+
+    }else{
+
+        projectorOn=false;
+
+        document.getElementById("screen").classList.remove("on");
+        document.getElementById("projection").style.display="none";
+        document.getElementById("light").style.display="none";
+
+        document.getElementById("status").innerHTML =
+        "Projektor wyłączony";
+
+        stopFanSound();
+    }
+}
+
+</script>
+
+</body>
+</html>
